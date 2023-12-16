@@ -35,6 +35,10 @@ class Graph {
         return !segment.p1.equals(segment.p2)
     }
 
+    hash(){
+        return JSON.stringify(this)
+    }
+
     removeSegment(segment) {
         this.segments.splice(this.segments.indexOf(segment), 1)
     }

@@ -12,11 +12,13 @@ class Envelope {
         const alpha_ccw = alpha - Math.PI / 2;
         const points = [];
         const step = Math.PI / Math.max(roundness, 1)
-        for (let i = alpha_ccw; i <= alpha_cw; i += step) {
+        const eps = step/2
+
+        for (let i = alpha_ccw; i <= alpha_cw+eps; i += step) {
             points.push(transate(p1, i, radius))
 
         }
-        for (let i = alpha_ccw; i <= alpha_cw; i += step) {
+        for (let i = alpha_ccw; i <= alpha_cw+eps; i += step) {
             points.push(transate(p2, Math.PI + i, radius))
 
         }

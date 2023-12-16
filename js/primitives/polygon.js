@@ -17,6 +17,16 @@ class Polygon {
         }
     }
 
+    intesectsPoly(poly) {
+        for (let s1 of this.segments) {
+            for (let s2 of poly.segments) {
+                if (getIntersection(s1.p1, s1.p2, s2.p1, s2.p2))
+                    return true
+            }
+        }
+        return false
+    }
+
     static break(poly1, poly2) {
         const segs1 = poly1.segments;
         const segs2 = poly2.segments;
@@ -50,7 +60,7 @@ class Polygon {
                         }
                     }
                 }
-                if (keep){
+                if (keep) {
                     keptSetmengs.push(seg)
                 }
             }
@@ -59,21 +69,21 @@ class Polygon {
     }
 
 
-    containsSegment(seg){
-        const midpoint = average(seg.p1,seg.p2);
+    containsSegment(seg) {
+        const midpoint = average(seg.p1, seg.p2);
         return this.containsPoint(midpoint)
     }
 
-    containsPoint(point){            
-        const outerPoint = new Point(-1000,-1000)
+    containsPoint(point) {
+        const outerPoint = new Point(-1000, -1000)
         let intersectionCount = 0;
-        for (let seg of this.segments){
-            const int = getIntersection(outerPoint,point,seg.p1,seg.p2)
-            if (int){
+        for (let seg of this.segments) {
+            const int = getIntersection(outerPoint, point, seg.p1, seg.p2)
+            if (int) {
                 intersectionCount++;
             }
         }
-        return intersectionCount%2==1;
+        return intersectionCount % 2 == 1;
     }
 
     drawSegments(ctx) {
@@ -82,8 +92,11 @@ class Polygon {
         }
     }
 
+    distanceToPoint(p){
+        return Math.min(...this.segments.map(s=>s.distanceToPoint(p)))
+    }
 
-    draw(ctx, { stroke = 'blue', lineWidth = 2, fill = 'rgba(0,0,255,0.3)' } = {}) {
+    draw(ctx, { stroke = 'blue', lineWidth = 2, fill = 'rgba(0,0,250,0.1)' } = {}) {
         ctx.fillStyle = fill;
         ctx.strokeStyle = stroke;
         ctx.lineWidth = lineWidth;

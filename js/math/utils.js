@@ -43,8 +43,8 @@ function getIntersection(a, b, c, d) {
     const tTop = (d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x)
     const uTop = (a.x - b.x) * (c.y - a.y) - (a.y - b.y) * (c.x - a.x)
     const bottom = (b.x - a.x) * (d.y - c.y) - (b.y - a.y) * (d.x - c.x)
-
-    if (bottom != 0) {
+    const eps = 0.001
+    if (Math.abs(bottom) > eps) {
         const t = tTop / bottom;
         const u = uTop / bottom;
         if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
@@ -56,6 +56,20 @@ function getIntersection(a, b, c, d) {
     }
     return null;
 }
+
+function normalize(p){
+    return scale(p,1/magnitude(p))
+}
+
+function magnitude(p){
+    return Math.hypot(p.x,p.y)
+}
+
+function dot(p1,p2){
+    return p1.x*p2.x + p1.y*p2.y
+
+}
+
 
 function lerp(a, b, t) {
     return a + (b - a) * t
