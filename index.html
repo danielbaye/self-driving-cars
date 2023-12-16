@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>World editor</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <h1> World editor</h1>
+    <canvas id="myCanvas"></canvas>
+
+    <div id="controls">
+        <button onclick="dispose()">delete graph</button>
+        <button onclick="save()">save graph</button>
+
+
+    </div>
+    <script src="js/GraphEditor.js"></script>
+    <script src="js/ViewPort.js"></script>
+    <script src="js/math/graph.js"></script>
+    <script src="js/math/utils.js"></script>
+    <script src="js/primitives/polygon.js"></script>
+    <script src="js/primitives/envelope.js"></script>
+    <script src="js/primitives/point.js"></script>
+    <script src="js/primitives/segments.js"></script>
+    <script>
+
+        myCanvas.width = 600;
+        myCanvas.height = 600;
+
+        const ctx = myCanvas.getContext('2d');
+        const graphstring = localStorage.getItem("graph");
+        const graphInfo = graphstring ? JSON.parse(graphstring) : null
+        const graph = !graphInfo ? new Graph() : Graph.load(graphInfo);
+        const viewPort = new ViewPort(myCanvas)
+        const graphEditor = new GraphEditor(viewPort, graph)
+
+        animate();
+
+        function animate() {
+            viewPort.reset()
+            graphEditor.display()
+            new Polygon(graph.points).draw(ctx)
+            requestAnimationFrame(animate);
+        }
+
+        function dispose() {
+            graphEditor.dispose()
+        }
+        function save() {
+            localStorage.setItem("graph", JSON.stringify(graph));
+        }
+
+
+    </script>
+
+</body>
+
+</html>
