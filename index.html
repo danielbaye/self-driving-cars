@@ -18,6 +18,7 @@
     </div>
     <script src="js/GraphEditor.js"></script>
     <script src="js/ViewPort.js"></script>
+    <script src="js/World.js"></script>
     <script src="js/math/graph.js"></script>
     <script src="js/math/utils.js"></script>
     <script src="js/primitives/polygon.js"></script>
@@ -33,6 +34,7 @@
         const graphstring = localStorage.getItem("graph");
         const graphInfo = graphstring ? JSON.parse(graphstring) : null
         const graph = !graphInfo ? new Graph() : Graph.load(graphInfo);
+        const world = new World(graph)
         const viewPort = new ViewPort(myCanvas)
         const graphEditor = new GraphEditor(viewPort, graph)
 
@@ -40,8 +42,9 @@
 
         function animate() {
             viewPort.reset()
+            world.generate()
+            world.draw(ctx)
             graphEditor.display()
-            new Polygon(graph.points).draw(ctx)
             requestAnimationFrame(animate);
         }
 
