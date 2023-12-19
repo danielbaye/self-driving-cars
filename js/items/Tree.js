@@ -1,8 +1,9 @@
 class Tree {
-    constructor(center, size = 10, highCoef = 0.3) {
+    constructor(center, size = 10, highCoef = 0.3, maxHeight = 150) {
         this.center = center
         this.size = size;
         this.highCoef = highCoef
+        this.maxHeight = maxHeight * 10
         this.base = this.#generateLevel(this.center, size)
 
     }
@@ -19,7 +20,12 @@ class Tree {
     }
     draw(ctx, viewPoint) {
         const diff = subtract(this.center, viewPoint)
-        const top = add(this.center, scale(diff, this.highCoef))
+        // const top = add(this.center, scale(diff, this.highCoef))
+        // const sub = subtract(this.center, viewPoint)
+        // const norm = scale(normalize(sub), this.maxHeight);
+        // const coefficientSub = scale(sub, this.hightCoef)
+        // const top = add(this.center, magnitude(coefficientSub) < this.maxHight ? coefficientSub : norm)
+        const top = add(this.center, tanhScale(diff, this.highCoef, this.maxHeight))
         const levelCount = 7;
         for (let level = 0; level < levelCount; level++) {
             const t = level / (levelCount - 1)

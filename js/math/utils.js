@@ -61,8 +61,6 @@ function normalize(p) {
     return scale(p, 1 / magnitude(p))
 }
 
-
-
 function magnitude(p) {
     return Math.hypot(p.x, p.y)
 }
@@ -72,6 +70,12 @@ function dot(p1, p2) {
 
 }
 
+function tanhScale(p, t, maxDistance) {
+    const dist = magnitude(p)
+    const precentage = 1 - (Math.tanh(dist / maxDistance))
+    const new_t = t * precentage
+    return scale(p, new_t)
+}
 
 function lerp(a, b, t) {
     return a + (b - a) * t
