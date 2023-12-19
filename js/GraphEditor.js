@@ -9,7 +9,7 @@ class GraphEditor {
         this.selected = null;
         this.hovered = null;
         this.dragging = false;
-        this.#addEventListeners()
+        // this.#addEventListeners()
 
     }
 
@@ -59,6 +59,29 @@ class GraphEditor {
         }
     }
 
+    #removeEventListeners() {
+        this.canvas.removeEventListener("mousedown", (event) => {
+            this.#handleMouseDown(event)
+        });
+        this.canvas.removeEventListener("mousemove", (event) => {
+            this.mouse = this.viewPort.getMouse(event, true)
+            this.hovered = getNearestPoint(this.mouse, this.graph.points, 10 * this.viewPort.zoom)
+
+            if (this.dragging) {
+                this.selected.x = this.mouse.x;
+                this.selected.y = this.mouse.y;
+            }
+
+        })
+        this.canvas.removeEventListener("mouseup", (event) => {
+            this.#handleMouseUp(event)
+        })
+        this.canvas.removeEventListener("contextmenu", event => {
+            event.preventDefault()
+        })
+    }
+
+
     #addEventListeners() {
         this.canvas.addEventListener("mousedown", (event) => {
             this.#handleMouseDown(event)
@@ -87,6 +110,12 @@ class GraphEditor {
         this.graph.dispose();
     }
 
+    enable() {
+        this.#addEventListeners()
+    }
+    disable() {
+        this.#removeEventListeners()
+    }
 
     display() {
         this.graph.draw(this.ctx)

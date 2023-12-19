@@ -30,4 +30,8 @@ class Point {
         return this.x == p.x && this.y == p.y
     }
 
+    distanceToPoint(p) {
+        return distance(this, p)
+    }
+
 }

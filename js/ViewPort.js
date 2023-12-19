@@ -55,7 +55,6 @@ class ViewPort {
         if (this.drag.active) {
             this.drag.end = this.getMouse(event)
             this.drag.offset = subtract(this.drag.end, this.drag.start)
-            console.log(this.drag)
         }
     }
 

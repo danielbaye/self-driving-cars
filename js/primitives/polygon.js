@@ -8,6 +8,10 @@ class Polygon {
 
     }
 
+    distnaceToPoly(poly) {
+        return Math.min(...this.points.map(p => poly.distanceToPoint(p)))
+    }
+
     static muliBreak(polygons) {
         for (let i = 0; i < polygons.length - 1; i++) {
             for (let j = i + 1; j < polygons.length; j++) {
@@ -92,15 +96,17 @@ class Polygon {
         }
     }
 
-    distanceToPoint(p){
-        return Math.min(...this.segments.map(s=>s.distanceToPoint(p)))
+    distanceToPoint(p) {
+        return Math.min(...this.segments.map(s => s.distanceToPoint(p)))
     }
 
-    draw(ctx, { stroke = 'blue', lineWidth = 2, fill = 'rgba(0,0,250,0.1)' } = {}) {
+    draw(ctx, { stroke = 'blue', lineWidth = 2, fill = 'rgba(0,0,180)' } = {}) {
         ctx.fillStyle = fill;
         ctx.strokeStyle = stroke;
         ctx.lineWidth = lineWidth;
         if (this.points.length > 1) {
+            ctx.beginPath();
+
             ctx.moveTo(this.points[0].x, this.points[0].y)
             for (let i = 1; i < this.points.length; i++) {
                 ctx.lineTo(this.points[i].x, this.points[i].y)
@@ -113,4 +119,5 @@ class Polygon {
 
     }
 }
+
 

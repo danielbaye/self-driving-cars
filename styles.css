@@ -1,14 +1,22 @@
-body
-{
+body {
     background-color: black;
     text-align: center;
 }
 
-h1{
+h1 {
     color: white;
     font-family: Arial;
 }
 
-#myCanvas{
+#myCanvas {
     background: #2a5;
+}
+
+button {
+    background-color: white;
+    font-size: 20px;
+    padding: 5px 7px 7px 5px;
+    border: none;
+    border-radius: 5px;
+    text-shadow: 1px 1px gray;
 }

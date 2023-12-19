@@ -23,8 +23,8 @@ function subtract(p1, p2) {
     return new Point(p1.x - p2.x, p1.y - p2.y);
 }
 
-function average(p1,p2){
-    return new Point((p1.x + p2.x)/2,(p1.y + p2.y)/2)
+function average(p1, p2) {
+    return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
 
 }
 
@@ -57,16 +57,18 @@ function getIntersection(a, b, c, d) {
     return null;
 }
 
-function normalize(p){
-    return scale(p,1/magnitude(p))
+function normalize(p) {
+    return scale(p, 1 / magnitude(p))
 }
 
-function magnitude(p){
-    return Math.hypot(p.x,p.y)
+
+
+function magnitude(p) {
+    return Math.hypot(p.x, p.y)
 }
 
-function dot(p1,p2){
-    return p1.x*p2.x + p1.y*p2.y
+function dot(p1, p2) {
+    return p1.x * p2.x + p1.y * p2.y
 
 }
 
@@ -75,9 +77,13 @@ function lerp(a, b, t) {
     return a + (b - a) * t
 }
 
-function getRandomColor(){
-    const hue = 290 + Math.random()*260;
-    return "hsl("+hue+",100%,60%)"
+function lerp2D(a, b, t) {
+    return new Point(lerp(a.x, b.x, t), lerp(a.y, b.y, t))
+}
+
+function getRandomColor() {
+    const hue = 290 + Math.random() * 260;
+    return "hsl(" + hue + ",100%,60%)"
 }
 
 function angle(point) {
