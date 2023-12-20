@@ -14,7 +14,7 @@ class Tree {
         for (let a = 0; a < Math.PI * 2; a += Math.PI / 16) {
             const kindOfRandom = Math.cos(((a + this.center.x) * size) % 17) ** 2
             const noisyRadius = rad * lerp(0.5, 1, kindOfRandom)
-            points.push(transate(point, a, noisyRadius))
+            points.push(translate(point, a, noisyRadius))
         }
         return new Polygon(points)
     }

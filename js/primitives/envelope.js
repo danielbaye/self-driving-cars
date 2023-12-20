@@ -15,11 +15,11 @@ class Envelope {
         const eps = step / 2
 
         for (let i = alpha_ccw; i <= alpha_cw + eps; i += step) {
-            points.push(transate(p1, i, radius))
+            points.push(translate(p1, i, radius))
 
         }
         for (let i = alpha_ccw; i <= alpha_cw + eps; i += step) {
-            points.push(transate(p2, Math.PI + i, radius))
+            points.push(translate(p2, Math.PI + i, radius))
 
         }
         return new Polygon(points)
