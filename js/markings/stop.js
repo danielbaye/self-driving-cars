@@ -1,12 +1,9 @@
-class Stop {
+class Stop extends Marking{
     constructor(center, direction, width, height) {
-        this.center = center
-        this.direction = direction
-        this.width = width
-        this.height = height
-        this.support = new Segment(translate(center, angle(direction), height / 2), translate(center, angle(direction), -height / 2));
-        this.poly = new Envelope(this.support, width, 0).poly
+        super(center, direction, width, height) 
+
         this.border = this.poly.segments[2]
+        this.type = "stop"
     }
 
 

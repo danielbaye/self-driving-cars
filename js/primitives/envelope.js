@@ -1,8 +1,19 @@
 class Envelope {
     constructor(skeleton, width, roundness = 9) {
-        this.skeleton = skeleton;
-        this.poly = this.#generatepolygon(width, roundness)
+        if (skeleton) {
+            this.skeleton = skeleton;
+            this.poly = this.#generatepolygon(width, roundness)
+        }
+
     }
+
+    static load(info) {
+        const env = new Envelope()
+        env.skeleton = new Segment(info.skeleton.p1,info.skeleton.p2)
+        env.poly = Polygon.load(info.poly)
+        return env
+    }
+    
 
     #generatepolygon(width, roundness) {
         const { p1, p2 } = this.skeleton;

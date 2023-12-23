@@ -7,11 +7,14 @@ class Building {
 
     }
 
+    static load(info){
+        return new Building(Polygon.load(info.base),info.hightCoef,info.maxHeight)
+    }
+
     draw(ctx, viewPoint) {
         const TopPoints = this.base.points.map(p => {
             const diff = subtract(p, viewPoint)
-            // const norm = scale(normalize(sub), this.maxHight);
-            // const coefficientSub = scale(sub, this.hightCoef)
+
             return add(p, tanhScale(diff, this.hightCoef, this.maxHeight))
         })
         // const TopPoints = this.base.points.map(p => add(p, scale(subtract(p, viewPoint), this.hightCoef)))

@@ -8,8 +8,6 @@ class World {
         this.graph = graph
         this.roadWidth = roadWidth;
         this.roadRoundness = roadRoundness;
-
-
         this.buildingWidth = buildingWidth;
         this.buidlingMinLength = buidlingMinLength;
         this.spacing = spacing;
@@ -156,6 +154,25 @@ class World {
 
     }
 
+    static load(worldInfo){
+        const world =  new World(new Graph)
+        world.graph = Graph.load(worldInfo.graph)
+        world.roadWidth = worldInfo.roadWidth;
+        world.roadRoundness = worldInfo.roadRoundness;
+        world.buildingWidth = worldInfo.buildingWidth;
+        world.buidlingMinLength = worldInfo.buidlingMinLength;
+        world.spacing = worldInfo.spacing;
+        world.treeSize = worldInfo.treeSize;
+        world.envelopes = worldInfo.envelopes.map(e=>Envelope.load(e));
+        world.roadBorders = worldInfo.roadBorders.map(e=>new Segment(e.p1,e.p2));
+        world.buildings = worldInfo.buildings.map(e=>Building.load(e));
+        world.trees = worldInfo.trees.map(t=>new Tree(t.center,t.size));;
+        world.laneGuides = worldInfo.laneGuides.map(e=>new Segment(e.p1,e.p2));
+        world.markings = worldInfo.markings.map(m=>Marking.load(m))
+        world.zoom = worldInfo.zoom
+        world.offset = worldInfo.offset
+        return world
+    }
 
 
     draw(ctx, viewPoint) {

@@ -83,14 +83,24 @@ function dot(p1, p2) {
 
 }
 
-function tanhScale(p, t, maxDistance) {
-    const dist = magnitude(p)
+// distance is a point representing a distnace, rate is the rate of change, maxDistance is the distance cap as a scalar,
+// returning a ranh scaled point for the maximal distance 
+function tanhScale(distance, rate, maxDistance) { 
+    const dist = magnitude(distance)
     const precentage = 1 - (Math.tanh(dist / maxDistance))
-    const new_t = t * precentage
-    return scale(p, new_t)
+    const new_t = rate * precentage
+    return scale(distance, new_t)
+}
+
+function tanhScalarScale(distance, rate, maxDistance) { 
+    const precentage = (Math.tanh(Math.abs(distance) / maxDistance))
+    const new_t = rate * precentage
+
+    return distance *new_t
 }
 
 function lerp(a, b, t) {
+    
     return a + (b - a) * t
 }
 
@@ -105,4 +115,30 @@ function getRandomColor() {
 
 function angle(point) {
     return Math.atan2(point.y, point.x);
+}
+
+function prependicular(point){
+    return new Point(-point.y,point.x)
+}
+
+function angleToPoint(a){
+    return new Point(Math.cos(a),Math.sin(a))
+}
+
+function angleDiff(a,b){ //b is to the right of A if position
+    angle1_rad = a % (2 * Math.PI);
+    angle2_rad = b % (2 * Math.PI);
+
+    // Calculate the signed difference
+    let diff_rad = angle1_rad - angle2_rad;
+
+    // Adjust to the range [-pi, pi)
+    if (diff_rad >= Math.PI) {
+        diff_rad -= 2 * Math.PI;
+    } else if (diff_rad < -Math.PI) {
+        diff_rad += 2 * Math.PI;
+    }
+    // console.log(angle1_rad,angle2_rad,diff_rad)
+
+    return diff_rad;
 }

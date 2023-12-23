@@ -13,22 +13,36 @@
     <div id="controls">
         <button onclick="dispose()">❌</button>
         <button onclick="save()">💾</button>
+        <label for="fileInput" class="file-input-label">📁
+            <input type="file" id="fileInput" accept=".world" onchange="load(event)">
+        </label>
         &nbsp;
+
         <button id='graphBtn' onclick="setMode('graph')">🛣</button>
         <button id='stopBtn' onclick="setMode('stop')">⛔️</button>
         <button id='crossingBtn' onclick="setMode('crossing')">🟰</button>
+        <button id='startBtn' onclick="setMode('start')">🚗</button>
 
 
 
     </div>
+    <script src="js/editors/markingEditor.js"></script>
+    <script src="js/markings/marking.js"></script>
+    <script src="js/carParts/controls.js"></script>
+    <script src="js/carParts/Sensor.js"></script>
     <script src="js/editors/GraphEditor.js"></script>
     <script src="js/editors/StopEditor.js"></script>
     <script src="js/editors/CrossingEditor.js"></script>
+    <script src="js/editors/startEditor.js"></script>
     <script src="js/markings/stop.js"></script>
+    <script src="js/markings/crossing.js"></script>
+    <script src="js/markings/start.js"></script>
     <script src="js/ViewPort.js"></script>
     <script src="js/World.js"></script>
     <script src="js/items/Tree.js"></script>
+    <script src="js/items/Road.js"></script>
     <script src="js/items/Building.js"></script>
+    <script src="js/items/myCar.js"></script>
     <script src="js/math/graph.js"></script>
     <script src="js/math/utils.js"></script>
     <script src="js/primitives/polygon.js"></script>
@@ -41,19 +55,33 @@
         myCanvas.height = 600;
 
         const ctx = myCanvas.getContext('2d');
-        const graphstring = localStorage.getItem("graph");
-        const graphInfo = graphstring ? JSON.parse(graphstring) : null
-        const graph = !graphInfo ? new Graph() : Graph.load(graphInfo);
-        const world = new World(graph)
-        const viewPort = new ViewPort(myCanvas)
+        const worldstring = localStorage.getItem("world");
+        const worldInfo = worldstring ? JSON.parse(worldstring) : null
+        let world = worldInfo ? World.load(worldInfo) : new World(new Graph)
+        const graph = world.graph
+
+        const viewPort = new ViewPort(myCanvas, world.zoom, world.offset)
         const graphEditor = new GraphEditor(viewPort, graph)
         const stopEditor = new StopEditor(viewPort, world)
         const crossingEditor = new CrossingEditor(viewPort, world)
+        const tools = {
+            graph: { button: graphBtn, editor: new GraphEditor(viewPort, graph) },
+            stop: { button: stopBtn, editor: new StopEditor(viewPort, world) },
+            crossing: { button: crossingBtn, editor: new CrossingEditor(viewPort, world) },
+            start: { button: startBtn, editor: new StartEditor(viewPort, world) }
+        }
 
         let oldGraphHash = graph.hash()
         disableEditors()
         setMode('graph')
+        let road = new Road(-600, 200, 0)
+
+        let myCar = new Car(new Point(road.getLaneCenter(1), 0), 15, 20, world, viewPort, 3, -Math.PI / 2, "main")
+        const traffic = [
+            new Car(new Point(road.getLaneCenter(0), 0), 15, 20, world, viewPort, 1, -Math.PI / 2)
+        ]
         animate();
+        
 
         function animate() {
             viewPort.reset()
@@ -62,52 +90,78 @@
                 oldGraphHash = graph.hash()
             }
             const viewPoint = scale(viewPort.getOffset(), -1)
+            ctx.save()
+            ctx.translate(0, -myCar.location.y)
             world.draw(ctx, viewPoint)
+            road.draw(ctx)
+            myCar.update(road.borders.poly,traffic)
+            myCar.draw(ctx)
+            for (const car of traffic) {
+                car.update(road.borders.poly)
+                car.draw(ctx)
+            }
             ctx.globalAlpha = 0.3
-            graphEditor.display()
-            stopEditor.display()
-            crossingEditor.display()
+            for (const tool of Object.values(tools))
+                tool.editor.display()
+            ctx.restore()
+
             requestAnimationFrame(animate);
         }
 
         function dispose() {
-            graphEditor.dispose()
+            for (const tool of Object.values(tools)) {
+                tool.editor.dispose()
+            }
             world.markings.length = 0
         }
         function save() {
-            localStorage.setItem("graph", JSON.stringify(graph));
+            world.zoom = viewPort.zoom;
+            world.offset = viewPort.offset;
+
+            const element = document.createElement("a");
+            element.setAttribute(
+                "href",
+                "data:application/json;charset=utf-8," +
+                encodeURIComponent(JSON.stringify(world))
+            );
+
+            const fileName = "name.world";
+            element.setAttribute("download", fileName);
+            element.click();
+
+            localStorage.setItem("world", JSON.stringify(world));
         }
-        function setMode(mode) {
-            disableEditors()
-            switch (mode) {
-                case 'graph': {
-                    graphBtn.style.backgroundColor = 'white'
-                    graphBtn.style.filter = ''
-                    graphEditor.enable()
-                    break;
-                }
-                case 'stop': {
-                    stopBtn.style.backgroundColor = 'white'
-                    stopBtn.style.filter = ''
-                    stopEditor.enable()
-                    break;
-                }
-                case 'crossing': {
-                    crossingBtn.style.backgroundColor = 'white'
-                    crossingBtn.style.filter = ''
-                    crossingEditor.enable()
-                    break;
-                }
+        function load(event) {
+            const file = event.target.files[0]
+            if (!file) {
+                alert("No file selected")
+                return
+            }
+            const reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = evt => {
+                const fileContent = evt.target.result;
+                const jsonData = JSON.parse(fileContent)
+                world = World.load(jsonData)
+                localStorage.setItem("world", JSON.stringify(world))
+                location.reload();
             }
         }
-        function disableEditors() {
-            graphBtn.style.backgroundColor = 'gray'
-            graphBtn.style.filter = 'grayscale(100%)'
-            graphEditor.disable()
-            stopBtn.style.backgroundColor = 'gray'
-            stopBtn.style.filter = 'grayscale(100%)'
-            stopEditor.disable()
 
+        function setMode(mode) {
+            disableEditors()
+            tools[mode].button.style.backgroundColor = 'white'
+            tools[mode].button.style.filter = ''
+            tools[mode].editor.enable()
+
+        }
+        function disableEditors() {
+            for (const tool of Object.values(tools)) {
+                tool.editor.disable()
+                tool.button.style.backgroundColor = 'gray';
+                tool.button.style.filter = 'grayscale(100%)'
+
+            }
         }
 
 

@@ -73,10 +73,12 @@ class Polygon {
     }
 
 
+
     containsSegment(seg) {
         const midpoint = average(seg.p1, seg.p2);
         return this.containsPoint(midpoint)
     }
+
 
     containsPoint(point) {
         const outerPoint = new Point(-1000, -1000)
@@ -98,6 +100,10 @@ class Polygon {
 
     distanceToPoint(p) {
         return Math.min(...this.segments.map(s => s.distanceToPoint(p)))
+    }
+
+    static load(info) {
+        return new Polygon(info.points.map(i=>new Point(i.x,i.y)))
     }
 
     draw(ctx, { stroke = 'blue', lineWidth = 2, fill = 'rgba(0,0,180)' } = {}) {
