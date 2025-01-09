@@ -23,6 +23,9 @@ function getNearestSegment(loc, segments, threshold = Number.MAX_SAFE_INTEGER) {
     return nearest;
 }
 
+function vectorSize(vec){
+    return Math.hypot(vec.x,vec.y)
+}
 
 function distance(p1, p2) {
     return Math.hypot(p1.x - p2.x, p1.y - p2.y);
@@ -85,22 +88,22 @@ function dot(p1, p2) {
 
 // distance is a point representing a distnace, rate is the rate of change, maxDistance is the distance cap as a scalar,
 // returning a ranh scaled point for the maximal distance 
-function tanhScale(distance, rate, maxDistance) { 
+function tanhScale(distance, rate, maxDistance) {
     const dist = magnitude(distance)
     const precentage = 1 - (Math.tanh(dist / maxDistance))
     const new_t = rate * precentage
     return scale(distance, new_t)
 }
 
-function tanhScalarScale(distance, rate, maxDistance) { 
+function tanhScalarScale(distance, rate, maxDistance) {
     const precentage = (Math.tanh(Math.abs(distance) / maxDistance))
     const new_t = rate * precentage
 
-    return distance *new_t
+    return distance * new_t
 }
 
 function lerp(a, b, t) {
-    
+
     return a + (b - a) * t
 }
 
@@ -117,15 +120,15 @@ function angle(point) {
     return Math.atan2(point.y, point.x);
 }
 
-function prependicular(point){
-    return new Point(-point.y,point.x)
+function prependicular(point) {
+    return new Point(-point.y, point.x)
 }
 
-function angleToPoint(a){
-    return new Point(Math.cos(a),Math.sin(a))
+function angleToPoint(a) {
+    return new Point(Math.cos(a), Math.sin(a))
 }
 
-function angleDiff(a,b){ //b is to the right of A if position
+function angleDiff(a, b) { //b is to the right of A if position
     angle1_rad = a % (2 * Math.PI);
     angle2_rad = b % (2 * Math.PI);
 
@@ -141,4 +144,12 @@ function angleDiff(a,b){ //b is to the right of A if position
     // console.log(angle1_rad,angle2_rad,diff_rad)
 
     return diff_rad;
+}
+
+function getRGBA(value) {
+    const alpha = Math.abs(value);
+    const R = value < 0 ? 0 : 255;
+    const G = R;
+    const B = value > 0 ? 0 : 255;
+    return "rgba(" + R + "," + G + "," + B + "," + alpha + ")";
 }

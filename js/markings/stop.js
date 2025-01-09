@@ -21,7 +21,6 @@ class Stop extends Marking{
         ctx.fontSize = "bold" + this.height * 0.3 + "px Arial"
         ctx.fillText("STOP", 0, 3)
         ctx.restore()
-
     }
 
 }

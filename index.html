@@ -9,10 +9,12 @@
 <body>
     <h1> World editor</h1>
     <canvas id="myCanvas"></canvas>
+    <canvas id="networkCanvas"></canvas>
 
     <div id="controls">
         <button onclick="dispose()">❌</button>
         <button onclick="save()">💾</button>
+        <button onclick="restart()">🧠</button>
         <label for="fileInput" class="file-input-label">📁
             <input type="file" id="fileInput" accept=".world" onchange="load(event)">
         </label>
@@ -30,6 +32,7 @@
     <script src="js/markings/marking.js"></script>
     <script src="js/carParts/controls.js"></script>
     <script src="js/carParts/Sensor.js"></script>
+    <script src="js/carParts/Network.js"></script>
     <script src="js/editors/GraphEditor.js"></script>
     <script src="js/editors/StopEditor.js"></script>
     <script src="js/editors/CrossingEditor.js"></script>
@@ -49,12 +52,18 @@
     <script src="js/primitives/envelope.js"></script>
     <script src="js/primitives/point.js"></script>
     <script src="js/primitives/segments.js"></script>
+    <script src="js/Visulaizer.js"></script>
     <script>
 
         myCanvas.width = 600;
         myCanvas.height = 600;
 
+        networkCanvas.width = 300
+        networkCanvas.height = 300
+
         const ctx = myCanvas.getContext('2d');
+        const networkCtx = networkCanvas.getContext('2d')
+
         const worldstring = localStorage.getItem("world");
         const worldInfo = worldstring ? JSON.parse(worldstring) : null
         let world = worldInfo ? World.load(worldInfo) : new World(new Graph)
@@ -74,37 +83,58 @@
         let oldGraphHash = graph.hash()
         disableEditors()
         setMode('graph')
-        let road = new Road(-600, 200, 0)
+        let road = new Road(250, 200, 0)
 
-        let myCar = new Car(new Point(road.getLaneCenter(1), 0), 15, 20, world, viewPort, 3, -Math.PI / 2, "main")
-        const traffic = [
-            new Car(new Point(road.getLaneCenter(0), 0), 15, 20, world, viewPort, 1, -Math.PI / 2)
-        ]
+        // let myCar = new Car(new Point(road.getLaneCenter(1), 300), 15, 20, world, viewPort, 5, -Math.PI / 2, "main")
+        const N = 100
+        const M = 5
+        const bestCars = 3
+        let aiCars = generateCars(N)
+        let traffic = generateDummyCars(M)
+        let bestCar = aiCars[0]
+
+        restartSimulation()
         animate();
-        
 
-        function animate() {
+
+        function animate(time) {
             viewPort.reset()
             if (graph.hash() != oldGraphHash) {
                 world.generate()
                 oldGraphHash = graph.hash()
             }
             const viewPoint = scale(viewPort.getOffset(), -1)
+            bestCar = aiCars.find(car => car.location.y == Math.min(...aiCars.map(c => c.location.y)))
+            aiCars.forEach(car => {
+                car.showSensor = false
+            });
+            bestCar.showSensor = true
+
             ctx.save()
-            ctx.translate(0, -myCar.location.y)
+            ctx.translate(0, -bestCar.location.y)
             world.draw(ctx, viewPoint)
             road.draw(ctx)
-            myCar.update(road.borders.poly,traffic)
-            myCar.draw(ctx)
+            ctx.globalAlpha = 0.3
+            for (const tool of Object.values(tools))
+                tool.editor.display()
+            networkCtx.lineDashOffset = -time / 50;
+
+            ctx.globalAlpha = 0.5
+            for (const car of aiCars) {
+                car.update(road.borders.poly, traffic)
+                car.draw(ctx)
+            }
+            ctx.globalAlpha = 1
+            bestCar.color = "blue"
             for (const car of traffic) {
                 car.update(road.borders.poly)
                 car.draw(ctx)
             }
-            ctx.globalAlpha = 0.3
-            for (const tool of Object.values(tools))
-                tool.editor.display()
+            bestCar.draw(ctx)
+            // myCar.draw(ctx)
             ctx.restore()
 
+            Visualizer.drawNetwork(networkCtx, bestCar.brain)
             requestAnimationFrame(animate);
         }
 
@@ -114,10 +144,16 @@
             }
             world.markings.length = 0
         }
+
+        function saveBrain() {
+            localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
+        }
+        function discardBrain() {
+            localStorage.removeItem("bestBrain");
+        }
         function save() {
             world.zoom = viewPort.zoom;
             world.offset = viewPort.offset;
-
             const element = document.createElement("a");
             element.setAttribute(
                 "href",
@@ -147,6 +183,34 @@
                 location.reload();
             }
         }
+        function restart() {
+            saveBrain()
+            aiCars = generateCars(N)
+            traffic = generateDummyCars(M)
+            bestCar = aiCars[0]
+
+            if (localStorage.getItem("bestBrain")) {
+                for (let i = 0; i < aiCars.length; i++) {
+                    aiCars[i].brain = JSON.parse(
+                        localStorage.getItem("bestBrain"));
+                    if (i != 0) {
+                        NeuralNetwork.mutate(aiCars[i].brain, 0.005);
+                    }
+                    if (i < 3)
+                        console.log(i, aiCars[i].brain.levels[0].biases)
+
+                }
+            }
+        }
+
+        function restartSimulation(time = 1000) {
+            setTimeout(() => {
+                restart()
+                restartSimulation(time)
+            }, time)
+
+        }
+
 
         function setMode(mode) {
             disableEditors()
@@ -162,6 +226,31 @@
                 tool.button.style.filter = 'grayscale(100%)'
 
             }
+        }
+        function generateDummyCars(M) {
+            {
+                const cars = []
+                cars.push(new Car(new Point(road.getLaneCenter(1), 0), 15, 20, world, viewPort, 2, -Math.PI / 2, "DUMMY")); cars.push(new Car(new Point(road.getLaneCenter(1), -100), 15, 20, world, viewPort, 2, -Math.PI / 2, "DUMMY"));
+                cars.push(new Car(new Point(road.getLaneCenter(0), -400), 15, 20, world, viewPort, 2, -Math.PI / 2, "DUMMY"));
+                cars.push(new Car(new Point(road.getLaneCenter(0), -450), 15, 20, world, viewPort, 2, -Math.PI / 2, "DUMMY"));
+                // for (let i = 0; i < M; i++) {
+                //     randomLane = Math.floor(Math.random() * 3)
+                //     height = -i * 100
+                //     cars.push(new Car(new Point(road.getLaneCenter(randomLane), height), 15, 20, world, viewPort, 2, -Math.PI / 2, "DUMMY"))
+                // }
+                return cars
+            }
+        }
+
+        function generateCars(N) {
+            const cars = new Array()
+            for (let i = 0; i < N; i++) {
+                randomLane = Math.floor(Math.random() * 3)
+                randomHeight = Math.floor(Math.random() * 300)
+                cars.push(new Car(new Point(road.getLaneCenter(1), 200), 15, 20, world, viewPort, 8, -Math.PI / 2, "AI"))
+
+            }
+            return cars
         }
 
 
